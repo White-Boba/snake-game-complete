@@ -202,8 +202,9 @@
 
   function setDirection(ndx, ndy) {
     if (!gameRunning || !gameStarted || isPaused) return;
-    if (ndx !== 0 && nextDx === -ndx) return;
-    if (ndy !== 0 && nextDy === -ndy) return;
+    // Check against actual current direction (dx/dy), not buffered — prevents 180° reversal via fast double-tap
+    if (ndx !== 0 && dx === -ndx) return;
+    if (ndy !== 0 && dy === -ndy) return;
     nextDx = ndx; nextDy = ndy;
   }
 
@@ -350,8 +351,8 @@
     if (head.y < 0) head.y = TILES - 1;
     if (head.y >= TILES) head.y = 0;
 
-    // Self collision
-    const selfHit = snake.some(s => s.x === head.x && s.y === head.y);
+    // Self collision — exclude tail tip (it vacates before head arrives)
+    const selfHit = snake.slice(0, -1).some(s => s.x === head.x && s.y === head.y);
     if (selfHit) {
       // Ghost mode active?
       const ghostFromPowerup = activePowerup && activePowerup.type === 'ghost';
